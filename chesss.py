@@ -399,7 +399,7 @@ class Piece:
         global current_turn
         global xy_zbite_biale
         global xy_zbite_czarne
-        global playing, white_moved, back_moved, piecesBlack, piecesWhite
+        global playing, white_moved, black_moved, piecesBlack, piecesWhite
         temp2 = current_piece[2]
 
         castle = self.current_piece_class.moving() #each piece has its own function for checking if it can move, which is defined in the pieces class
@@ -484,6 +484,9 @@ class Piece:
                 white_moved[2] = True
             elif temp2 == (fromEdge_x, (fromEdge_y+7*SquareWidth),SquareWidth,SquareWidth):
                 white_moved[0] = True
+            elif temp2 == (fromEdge_x, fromEdge_y, SquareWidth, SquareWidth):
+                black_moved[0] = True
+            elif temp2 == ((fromEdge_x+7*SquareWidth), fromEdge_y, SquareWidth, SquareWidth)
             current_piece = 0
             self.new_colour = self.colour
             pressed_square = 0
