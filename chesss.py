@@ -7,8 +7,8 @@ current_piece[0] stores the name eg Pawn
 current_piece[1] stores the object from class Piece
 current_piece[2] stores the pygame.Rect
 pressed_square stores the pygame.Rect
-copy started 09.07.2022
-everything works i think but theres no checkmte, ice made things fullscreen
+copy started 20.07.2022
+i think the only thing im missing is en passant
 '''
 
 pygame.init()
@@ -21,14 +21,15 @@ white_colour = (255,255,255)
 black_colour = (60,60,60)
 ScreenWidth = screensize[0] #width of the actual window
 ScreenHeight = screensize[1] #height of the actual window
-PlayWidth = int(screensize[0]/2 - 72) #width and height of the chessboard on the window
+#PlayWidth = int(screensize[0]/2 - 72) #width and height of the chessboard on the window
+PlayWidth = 600
 SquareWidth = int(PlayWidth/8) #to find how big the squares are
 white = (255,255,255)
 borderColour = (200,200,200)
-#fromEdge_x = 100
+#fromEdge_x = 30
 #fromEdge_y = 30
-fromEdge_y = 72
-fromEdge_x = 408 #the distance the chess board is from the left of the screen, just to make it look pretty and to make it easier to move it away without having to alter the code in numerous places
+fromEdge_y = int((screensize[1]-PlayWidth)/2)
+fromEdge_x = int((screensize[0]-PlayWidth)/2) #the distance the chess board is from the left of the screen, just to make it look pretty and to make it easier to move it away without having to alter the code in numerous places
 pieces = ('Rook', 'Knight', 'Bishop','Queen','King','Bishop','Knight','Rook','Pawn','Pawn','Pawn','Pawn','Pawn','Pawn','Pawn','Pawn')
 list_pieces = ['Pawn', 'King', 'Rook', 'Queen', 'Knight', 'Bishop']
 global mouse_pos
@@ -55,6 +56,8 @@ piecesBlack2 = []
 piecesWhite2 = []
 xy_zbite_biale = [0,(ScreenHeight-200)]
 xy_zbite_czarne = [(fromEdge_x+PlayWidth+40),120]
+white_moved = [False,False,False] #left rook, king, right rook
+black_moved = [False,False,False] #left rook, king, right rook
 
 
 def check_end_game(list1,list2, colour): #this function will check if each piece can move to each square in turn, and will return true if at least one piece is available to move. parameter list1 specifies the colour of the pieces whos turn it is, so if its whites turn list1 = piecesWhite and will check for each of these in turn if there is any place at all for them to move
@@ -91,10 +94,8 @@ def check_end_game(list1,list2, colour): #this function will check if each piece
                     current_piece = temp
                     pressed_square = temp2
                     if checked[0] == True and checked[1] == True:
-                        print(colour,temp,temp2)
                         return True
                     if checked[0] == False:
-                        print(colour,temp,temp2)
                         return True
 
     return False
@@ -224,7 +225,6 @@ def displaying_images():
         for j in range(len(list_pieces)):
             if piecesBlack2[i] == list_pieces[j]:
                 screen.blit(blackImages[j], (piecesBlack2[i+1].x,piecesBlack2[i+1].y))
-
 appending_images()
 
 
@@ -273,6 +273,7 @@ def displayingBoard():  #making the chess board
         pygame.draw.rect(screen, board_rect_colours[j], board_rects[j])
 
     '''
+    #prints the x and y coordinates of the board, used for testing
     for i in range(fromEdge_y,ScreenWidth,SquareWidth):
         writingText(i, 0, i, fromEdge_y, SquareWidth,(255,255,255),0,20)
     for i in range(fromEdge_x,ScreenWidth,SquareWidth):
@@ -280,11 +281,21 @@ def displayingBoard():  #making the chess board
     '''
 
 
-
 def checking_move(list1, list2,mouse_pos): #the colour is to check whos move it is, list1 is either piecesWhite or piecesBlack (the one who's move it currently is)
     global current_piece
     global pressed_square
     global index
+
+    if current_piece != 0:
+        if current_piece[0] == 'King':
+            for rect in board_rects:
+                if rect.collidepoint(mouse_pos[0],mouse_pos[1]): #checks the coordinates of the square on which the mouse is pressed
+                    if rect[1] == current_piece[1].y: #makes sure the king is moving horizontally in a straight line
+                        if SquareWidth*2 == abs(current_piece[1].x - rect[0]) or rect[0] == (current_piece[1].x-4*SquareWidth) or rect[0] == (current_piece[1].x+3*SquareWidth):
+                            pressed_square = rect
+                            current_piece[1].moving_piece()
+                            return #so that it doesn't go on to choosing pressed_square
+
 
     for i in range (0,len(list1)): #looks through the list depending on whos turn it is and if the right colour is presses the current piece is set to whateber has been pressed on
         if list1[i][2].collidepoint(mouse_pos[0],mouse_pos[1]):
@@ -303,6 +314,10 @@ def checking_move(list1, list2,mouse_pos): #the colour is to check whos move it 
 
             if pressed_square != 0: #if a square to move the piece to is chosen (so isnt 0), the function to check if the piece can be moved is called
                 current_piece[1].moving_piece()
+            else:
+                if index < len(list1):
+                    list1[index][1].new_colour = list1[index][1].colour
+                current_piece = 0
 
 
 class Piece:
@@ -362,7 +377,6 @@ class Piece:
             result = checking_king(piecesWhite, piecesBlack)
             if result[0] == True:
                 if result[1] == False:
-                    print('white king go  die')
                     self.current_piece_class.move = False
                     piecesWhite[index][2] = temp
 
@@ -372,7 +386,6 @@ class Piece:
             result = checking_king(piecesBlack, piecesWhite)
             if result[0] == True: #bedzie true jesli jak sie przesuniesz bialym to bezie szach na krula, wiec wtedy nie mozesz sie tam przesunac.
                 if result[1] == False: #false jesli przesuwajac sie nie zbijasz figury ktora szchuje krola
-                    print('black king go  die')
                     self.current_piece_class.move = False
                     self.current_piece_class.collided = False
                     piecesBlack[index][2] = temp
@@ -386,11 +399,34 @@ class Piece:
         global current_turn
         global xy_zbite_biale
         global xy_zbite_czarne
-        global playing
+        global playing, white_moved, back_moved, piecesBlack, piecesWhite
+        temp2 = current_piece[2]
 
-        self.current_piece_class.moving() #each piece has its own function for checking if it can move, which is defined in the pieces class
+        castle = self.current_piece_class.moving() #each piece has its own function for checking if it can move, which is defined in the pieces class
+        #this will return None for any movement apart from castling, so if the king is pressed to move to the left or right and the collision is also hecked in the king.moving() function
+        if castle != None: #so if this movement is castling it goes to here because any other move would return None. If the move is catling the value returned is the new coordinate the king should move to.
+            if current_piece[1].colour == 'white':
+                returned = self.castling_part2(piecesWhite, castle) #if castling is true then returned will be the new modified list with king's and rooks coordinates changed, otherwise itll return None
+                if returned != None:
+                    piecesWhite = returned
+                    current_turn = 'black'
+                    pygame.time.set_timer(timers[1].timer_event, 1000) #black timer starts running
+                    pygame.time.set_timer(timers[0].timer_event, 0) #white timer stop running
 
-        if self.current_piece_class.collided: #checks if the piece will end on the king. if yes then move will be set too false (collided is also set to false)
+            elif current_piece[1].colour == 'black':
+                returned = self.castling_part2(piecesBlack, castle)
+                if returned != None:
+                    piecesBlack = returned
+                    current_turn = 'white'
+                    pygame.time.set_timer(timers[0].timer_event, 1000) #black timer starts running
+                    pygame.time.set_timer(timers[1].timer_event, 0) #white timer stop running
+
+            current_piece = 0
+            self.new_colour = self.colour
+            pressed_square = 0
+            return
+
+        if self.current_piece_class.collided: #checks if the piece will end on the king. if yes then move will be set to false (collided is also set to false)
             if current_piece[1].colour == 'white':
                 if piecesBlack[self.current_piece_class.j][0] == 'King':
                     self.current_piece_class.move = False
@@ -399,29 +435,28 @@ class Piece:
                 if piecesWhite[self.current_piece_class.j][0] == 'King':
                     self.current_piece_class.move = False
                     self.current_piece_class.collided = False
-
         if self.current_piece_class.move == True: #only if it can move, it checks if after the move this pieces king will be under attack, and then the piece wont move
             self.checking_checkmate()
 
         if self.current_piece_class.move == True: #if all the conditions are met and the piece is allowed to move its x and y coordinates are changed to the x and y coordinates of the square that it moves to
-
             if current_piece[1].colour == 'black': #changes the x and y coordinates in the list piecesBlack (at the correct index) to the new coordinates
                 current_turn = 'white'
                 pygame.time.set_timer(timers[0].timer_event, 1000) #white timer start running
                 pygame.time.set_timer(timers[1].timer_event, 0) #black timer stop running
+                if piecesBlack[index][0] == 'King': #if the piece that has just moved is king it sets it to True because then you won't be allowed to castle
+                    black_moved[1] = True
+                    print('black king moved')
                 if self.current_piece_class.collided: #collided will only be true if the collision is with a piece of the different colour and at the chosen square, if there is a collision anywhere else move wont be true so it wont get to this part of the program.
                     piecesWhite[self.current_piece_class.j][1].x = xy_zbite_biale[0]
                     piecesWhite[self.current_piece_class.j][1].y = xy_zbite_biale[1]
                     self.appending(piecesWhite2,piecesWhite, self.current_piece_class.j)
                     self.removing_from_list(self.current_piece_class.j, piecesWhite)
-                    if xy_zbite_biale[0] >= SquareWidth*3:
+                    if xy_zbite_biale[0] >= SquareWidth*3: #this sets up the pieces that have been taken off the board
                         xy_zbite_biale[0] = 0
                         xy_zbite_biale[1] -= SquareWidth
                     else:
                         xy_zbite_biale[0] += SquareWidth
-                if check_end_game(piecesWhite, piecesBlack, 'white') == True:
-                    print('whtie will be able to movw')
-                else:
+                if check_end_game(piecesWhite, piecesBlack, 'white') != True:
                     playing = False
 
 
@@ -429,6 +464,9 @@ class Piece:
                 current_turn = 'black'
                 pygame.time.set_timer(timers[1].timer_event, 1000) #black timer starts running
                 pygame.time.set_timer(timers[0].timer_event, 0) #white timer stop running
+                if piecesWhite[index][0] == 'King':
+                    print('white king moved')
+                    white_moved[1] = True
                 if self.current_piece_class.collided:
                     piecesBlack[self.current_piece_class.j][1].x = xy_zbite_czarne[0]
                     piecesBlack[self.current_piece_class.j][1].y = xy_zbite_czarne[1]
@@ -439,12 +477,13 @@ class Piece:
                         xy_zbite_czarne[1] += SquareWidth
                     else:
                         xy_zbite_czarne[0] += SquareWidth
-                if check_end_game(piecesBlack, piecesWhite, 'black') == True:
-                    print('black will be abel to move')
-                else:
+                if check_end_game(piecesBlack, piecesWhite, 'black') != True:
                     playing = False
 
-
+            if temp2 == ((fromEdge_x+7*SquareWidth),(fromEdge_y+7*SquareWidth),SquareWidth,SquareWidth): #if the piece that just moved is the rook in the right corner then it moving is set to True
+                white_moved[2] = True
+            elif temp2 == (fromEdge_x, (fromEdge_y+7*SquareWidth),SquareWidth,SquareWidth):
+                white_moved[0] = True
             current_piece = 0
             self.new_colour = self.colour
             pressed_square = 0
@@ -452,6 +491,31 @@ class Piece:
 
         else: #goes here if the piece can't move to the chosen square. This resets the value stored at pressed_square
             pressed_square = 0
+
+    def castling_part2(self, list1, castle): #list one is whoever move it is so if its white moving then its piecesWhite, catle is the new x coordinate of the king. This is only if the right pressed_square has been pressed and there is no collision.
+        temp_x2 = list1[index][1].x
+        adder = int((self.x-castle)/2) #adder will always be equal to the size of pressed square but this finds if its positive or negative
+        for i in range(castle,(self.x+adder),adder): #changes the x coordinate of the pressed square temporarily to see if the king moving will be in check
+            pressed_square[0] = i
+            self.checking_checkmate()
+        pressed_square[0] = castle #because it has been changed above
+        if self.current_piece_class.move == False:
+            list1[index][1].x = temp_x2
+            list1[index][2].x = temp_x2
+        elif self.current_piece_class.move == True: #actually moves the king and rook, this is after all the validation has been done
+            self.x = castle #moves the king two places to the left or right (castle is the x coordinate where it should move)
+            list1[index][2] = pygame.Rect(self.x,self.y,SquareWidth,SquareWidth)
+            for i in range(len(list1)): #following section of code moves the rook. it finds where the rook is in relation to the king and moves it whichever way it needs to
+                if list1[i][0] == 'Rook':
+                    if list1[i][2].x == self.x + SquareWidth: #if the rook is to the right of the king
+                        list1[i][2].x = self.x - SquareWidth
+                        list1[i][1].x = self.x - SquareWidth
+                        break
+                    if list1[i][2].x == self.x - 2*SquareWidth: #if the rook is to the right of the king
+                        list1[i][2].x = self.x + SquareWidth
+                        list1[i][1].x = self.x + SquareWidth
+                        break
+            return list1
 
     def appending(self, list, list2, index):
         for j in list2[index]:
@@ -745,7 +809,6 @@ class King:
         self.y = y
         self.move = False
         self.collided = False
-        self.attackedm = False
 
     def moving(self):
         if self.x != pressed_square[0] or self.y != pressed_square[1]:
@@ -766,11 +829,41 @@ class King:
                     self.move = False
                 self.checks_collision(piecesWhite,pressed_square[0],pressed_square[1])
 
+        if pressed_square[1] == self.y: #this is for castling. the king is moving horizontally in line so y coordinate must stay the same
+            if current_piece[1].colour == 'white':
+                castle = self.castling(white_moved)
+                return castle
+            elif current_piece[1].colour == 'black':
+                castle = self.castling(black_moved)
+                return castle
+
     def checks_collision(self,list,x,y):
         for i in range(0,len(list)):
             if (pygame.Rect(x,y,SquareWidth,SquareWidth)).colliderect(list[i][2]):
                 self.collided = True
                 self.j = i
+
+    def castling(self, moved_list): #this check which square is selected, if its one for castling then it checks if it can do that without collididng with anything, if yes then it returns the x coordiante the king should move to, otherwise it returns None. moved_list is eg white_moved, whoevers turns it is.
+        if moved_list[1] == False:
+            if pressed_square[0] == self.x+SquareWidth*2 or pressed_square[0]==self.x+SquareWidth*3: #if the king is going to go right then it moves to the right by two places.
+                if moved_list[2] == False:
+                    self.checks_collision(piecesWhite,self.x+SquareWidth, self.y)
+                    self.checks_collision(piecesBlack,self.x+SquareWidth, self.y)
+                    self.checks_collision(piecesWhite,self.x+2*SquareWidth, self.y)
+                    self.checks_collision(piecesBlack,self.x+2*SquareWidth, self.y)
+                    if self.collided == False:
+                        self.move = True
+                        new_king_pos = self.x+SquareWidth*2
+                        return new_king_pos #returns the new x at which the king should be if it can castle
+            elif pressed_square[0] == self.x-SquareWidth*2 or pressed_square[0] == self.x-SquareWidth*4: #if the king is going left then x will decrease by 2 squares/
+                if moved_list[0] == False: #if left corner rook hasnt moved yet
+                    for x in range(self.x-SquareWidth, self.x-SquareWidth*4, -SquareWidth): #checks collision between rook and king.
+                        self.checks_collision(piecesBlack,x, self.y)
+                        self.checks_collision(piecesWhite,x, self.y)
+                    if self.collided == False:
+                        self.move = True
+                        new_king_pos = self.x-SquareWidth*2
+                        return new_king_pos
 
 
 for i in range(0,16): #creates all the pieces at the start of the game and stores them as object on the class Piece in two seperate array for the two colours
@@ -830,7 +923,6 @@ def main():
 
 '''
 assigns_timers()
-
 
 while True:
     main()
