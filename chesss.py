@@ -487,7 +487,7 @@ class Piece:
             elif temp2 == (fromEdge_x, fromEdge_y, SquareWidth, SquareWidth):
                 black_moved[0] = True
             elif temp2 == ((fromEdge_x+7*SquareWidth), fromEdge_y, SquareWidth, SquareWidth):
-                black_moved[2] = True 
+                black_moved[2] = True
             current_piece = 0
             self.new_colour = self.colour
             pressed_square = 0
