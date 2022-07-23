@@ -125,6 +125,8 @@ def checking_king(list1, list2): #list1 is the list which contains the king, so 
         current_piece[1].link_class()
         current_piece[1].current_piece_class.moving() #specificzne dla kazdej figury, zwroci .move i .collided zeby zobaczyc czy przsuwanie na pole krola jest mozliwe jesli tak to jest szach.
         if current_piece[1].current_piece_class.collided:
+            print('piece',current_piece)
+            print(current_piece[1].current_piece_class.j, list1)
             if list1[current_piece[1].current_piece_class.j][0] == 'King':
                 attacker.append(current_piece)
                 attacker_count += 1 #tak jakby wiecej niz jedna figura atakowala krola.
@@ -584,10 +586,10 @@ class Rook:
                 self.checks_collision(piecesWhite, pressed_square[0], pressed_square[1])
 
     def checks_collision(self,list,x,y):
-        for i in range(0,len(list)):
-            if (pygame.Rect(x,y,SquareWidth,SquareWidth)).colliderect(list[i][2]):
+        for j in range(0,len(list)):
+            if (pygame.Rect(x,y,SquareWidth,SquareWidth)).colliderect(list[j][2]):
                 self.collided = True
-                self.j = i
+                self.j = j
 
 
 class Pawn:
@@ -637,9 +639,9 @@ class Pawn:
 
     def checks_collision(self,list,x): #list is either piecesBlack or piecesWhite
         difference = abs(pressed_square[1]-self.y) #to check if it can move without colliding
-        for i in range(SquareWidth, (difference+SquareWidth), SquareWidth): #checks if there will be any collision if the pawn is moved forward
+        for n in range(SquareWidth, (difference+SquareWidth), SquareWidth): #checks if there will be any collision if the pawn is moved forward
             for j in range(0,len(list)):
-                if (pygame.Rect(x, (self.y+(self.multiplier*i)), SquareWidth, SquareWidth)).colliderect(list[j][2]):
+                if (pygame.Rect(x, (self.y+(self.multiplier*n)), SquareWidth, SquareWidth)).colliderect(list[j][2]):
                     self.j = j #j is the index of the value which should be removed from the list
                     self.collided = True
 
@@ -680,10 +682,10 @@ class Knight:
                 self.checks_collision(piecesWhite,pressed_square[0],pressed_square[1])
 
     def checks_collision(self,list,x,y):
-        for i in range(0,len(list)):
-            if (pygame.Rect(x,y,SquareWidth,SquareWidth)).colliderect(list[i][2]):
+        for n in range(0,len(list)):
+            if (pygame.Rect(x,y,SquareWidth,SquareWidth)).colliderect(list[n][2]):
                 self.collided = True
-                self.j = i
+                self.j = n
 
 
 class Bishop:
@@ -727,10 +729,10 @@ class Bishop:
                 self.checks_collision(piecesWhite, pressed_square[0], pressed_square[1])
 
     def checks_collision(self,list,x,y):
-        for i in range(0,len(list)):
-            if (pygame.Rect(x,y,SquareWidth,SquareWidth)).colliderect(list[i][2]):
+        for n in range(0,len(list)):
+            if (pygame.Rect(x,y,SquareWidth,SquareWidth)).colliderect(list[n][2]):
                 self.collided = True
-                self.j = i
+                self.j = n
 
 
 class Queen:
@@ -800,10 +802,10 @@ class Queen:
                 self.checks_collision(piecesWhite, pressed_square[0], pressed_square[1])
 
     def checks_collision(self,list,x,y):
-        for i in range(0,len(list)):
-            if (pygame.Rect(x,y,SquareWidth,SquareWidth)).colliderect(list[i][2]):
+        for n in range(0,len(list)):
+            if (pygame.Rect(x,y,SquareWidth,SquareWidth)).colliderect(list[n][2]):
                 self.collided = True
-                self.j = i
+                self.j = n
 
 
 class King:
@@ -842,10 +844,10 @@ class King:
                 return castle
 
     def checks_collision(self,list,x,y):
-        for i in range(0,len(list)):
-            if (pygame.Rect(x,y,SquareWidth,SquareWidth)).colliderect(list[i][2]):
+        for n in range(0,len(list)):
+            if (pygame.Rect(x,y,SquareWidth,SquareWidth)).colliderect(list[n][2]):
                 self.collided = True
-                self.j = i
+                self.j = n
 
     def castling(self, moved_list): #this check which square is selected, if its one for castling then it checks if it can do that without collididng with anything, if yes then it returns the x coordiante the king should move to, otherwise it returns None. moved_list is eg white_moved, whoevers turns it is.
         if moved_list[1] == False:
@@ -922,7 +924,7 @@ def main():
     else:
         pygame.draw.rect(screen, (255,0,0), ((1*(PlayWidth+fromEdge_x)+100), (10), 200, 100),5)
 
-    #checking_king()
+
     pygame.display.flip()
 
 '''
