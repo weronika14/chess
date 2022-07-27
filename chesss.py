@@ -104,7 +104,7 @@ def check_end_game(list1,list2, colour): #this function will check if each piece
 def endScreen(text, bg_clr, txt_clr):
     x = 1536/2-200
     y = 864/2-200
-    writingText(text, x, y, 400, 400, txt_clr, bg_clr, 50)
+    writingText(text, x, y, 400, 400, txt_clr, bg_clr, 50, True)
     pygame.draw.rect(screen,txt_clr,(x,y,400,400),10)
 
 
@@ -228,9 +228,10 @@ def displaying_images():
 appending_images()
 
 
-def writingText(text, x, y, width, height, txt_colour, rect_colour, size): #function for writing text
+def writingText(text, x, y, width, height, txt_colour, rect_colour, size, draw_bg): #function for writing text
     textFont = pygame.font.Font('freesansbold.ttf', size)
-    pygame.draw.rect(screen, rect_colour, (x,y, width, height))
+    if draw_bg:
+        pygame.draw.rect(screen, rect_colour, (x,y, width, height))
     textDisplay = textFont.render(str(text), True, txt_colour)
     textRect = textDisplay.get_rect()
     textRect.center = ((x + width/2), (y + height/2))
@@ -247,7 +248,8 @@ def displayingBoard():  #making the chess board
             board_rect_colours.pop(0)
     count_x = 0
 
-    pygame.draw.rect(screen, borderColour, ((fromEdge_x-thickness),(fromEdge_y-thickness),(PlayWidth+thickness*2),(PlayWidth+thickness*2))) #border rectangle
+    thickness2 = 5
+    pygame.draw.rect(screen, borderColour, ((fromEdge_x-thickness2),(fromEdge_y-thickness2),(PlayWidth+thickness2*2),(PlayWidth+thickness2*2))) #border rectangle
 
     for i in range(fromEdge_x, (PlayWidth+fromEdge_x), SquareWidth): #drawing grid
 
@@ -264,10 +266,10 @@ def displayingBoard():  #making the chess board
         count_x +=1
     for i in range (0,8): #doing the writing on the side of the grid (letters going horizontally)
         letter = chr(65 + i) #because A is 65, so from 65 onwards
-        writingText(letter, (i*SquareWidth+fromEdge_x), (fromEdge_y-thickness), SquareWidth, (thickness), white, borderColour, 30)
-        writingText(letter, (i*SquareWidth+fromEdge_x), (fromEdge_y+PlayWidth), SquareWidth, (thickness), white, borderColour, 30)
-        writingText((8-i), (fromEdge_x-thickness), (i*SquareWidth+fromEdge_y), (thickness), SquareWidth, white, borderColour, 30)
-        writingText((8-i), (fromEdge_x+PlayWidth), (i*SquareWidth+fromEdge_y), (thickness), SquareWidth, white, borderColour, 30)
+        writingText(letter, (i*SquareWidth+fromEdge_x), (fromEdge_y-thickness), SquareWidth, (thickness), white, borderColour, 30, False)
+        writingText(letter, (i*SquareWidth+fromEdge_x), (fromEdge_y+PlayWidth), SquareWidth, (thickness), white, borderColour, 30, False)
+        writingText((8-i), (fromEdge_x-thickness), (i*SquareWidth+fromEdge_y), (thickness), SquareWidth, white, borderColour, 30, False)
+        writingText((8-i), (fromEdge_x+PlayWidth), (i*SquareWidth+fromEdge_y), (thickness), SquareWidth, white, borderColour, 30, False)
 
     for j in range(0,64):
         pygame.draw.rect(screen, board_rect_colours[j], board_rects[j])
@@ -914,8 +916,8 @@ def main():
         timers[i].decreasing_timer()
         j = abs(i-1)
 
-        writingText('time left:', (i*(PlayWidth+fromEdge_x)+100), (ScreenHeight*j-120*j+10), 200, 50, white, (j*999999999), 30)
-        writingText(timers[i].timer, (i*(PlayWidth+fromEdge_x)+100), (ScreenHeight*j-120*j+60), 200, 50, white, (j*999999999), 30)
+        writingText('time left:', (i*(PlayWidth+fromEdge_x)+100), (ScreenHeight*j-120*j+10), 200, 50, white, (j*999999999), 30, True)
+        writingText(timers[i].timer, (i*(PlayWidth+fromEdge_x)+100), (ScreenHeight*j-120*j+60), 200, 50, white, (j*999999999), 30, True)
 
     if current_turn == 'white':
         pygame.draw.rect(screen, (255,0,0), ((0*(PlayWidth+fromEdge_x)+100), (ScreenHeight-110), 200, 100),5)
