@@ -10,6 +10,10 @@ screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
 screensize = pygame.display.get_window_size()
 print(screensize)
 
+print(screen.get_alpha())
+screen.set_alpha(255)
+print(screen.get_alpha())
+
 screen_width = screensize[0]
 screen_height = screensize[1]
 colour = (999999999)
@@ -28,7 +32,7 @@ rectangle_height = 60
 background_image = pygame.image.load(r"assets\chessBackground.jpg")
 background_image = pygame.transform.scale(background_image, (screen_width,screen_height))
 
-def hover_mouse(rectangle, x, y):
+def hover_mouse(rectangle, x, y):#makes the rectangle over which the mouse is hovering change colour and expand, x and y are the original coordinates of the rect.
     scale = 16
     if rectangle.rectangle.collidepoint(mouse_pos):
         rectangle.colour = new_colour
@@ -41,7 +45,7 @@ def hover_mouse(rectangle, x, y):
         rectangle.width = rectangle_width
         rectangle.height = rectangle_height
         rectangle.x = x
-        rectangle.y = y #makes the rectangle over which the mouse is hovering change colour and expand
+        rectangle.y = y
 
 def finding_x(screenwidth, rectanglewidth, i):
     centre = screenwidth / i
@@ -56,6 +60,18 @@ def writingText(text, x, y, width, height, colour, size): #function for writing 
     textRect = textDisplay.get_rect()
     textRect.center = ((x + width/2), (y + height/2))
     screen.blit(textDisplay, textRect)
+
+def shadow(rectangle):
+    x = rectangle.x-5
+    y = rectangle.y-5
+    width = rectangle.width+10
+    height = rectangle.height+10
+    colour = rectangle.colour
+    rect11 = pygame.Surface((width,height))
+    rect11.set_alpha(50)
+    rect11.fill((colour))
+    screen.blit(rect11,(x,y))
+
 
 class Rectangle:
 
@@ -74,7 +90,6 @@ class Rectangle:
         writingText(self.text,self.x,self.y,self.width,self.height,self.colour,self.size)
 
 rectangle_play = Rectangle(finding_x(screen_width,rectangle_width, 2),200,rectangle_width, rectangle_height,'Play chess',size)
-rect_shad = pygame.Rect(finding_x(screen_width,rectangle_width, 2)-5,200-5,rectangle_width+10, rectangle_height+10)
 rectangle_play2 = Rectangle(finding_x(screen_width,rectangle_width, 2),320,rectangle_width, rectangle_height,'Play checkers',size)
 rectangle_settings = Rectangle(finding_x(screen_width,rectangle_width, 2),440,rectangle_width, rectangle_height,'Settings',size)
 rectangle_exit = Rectangle(finding_x(screen_width,rectangle_width, 2),560,rectangle_width, rectangle_height,'Exit',size)
@@ -96,25 +111,31 @@ while True:
     screen.blit(background_image, (0, 0))
 
     for i in range(0,len(rectangles)):
+        shadow(rectangles[i])
         rectangles[i].dislayingBoxes() #these are only drawn once play game is  pressed
     if rectangle_play != 0: #because once its pressed it disapppears which would give a syntax error so needs to be checked
-        pygame.draw.rect(screen, (128,128,128), rect_shad)
+        shadow(rectangle_play)
         rectangle_play.dislayingBoxes()
     if rectangle_play2 != 0:
+        shadow(rectangle_play2)
         rectangle_play2.dislayingBoxes()
     if rectangle_settings != 0:
+        shadow(rectangle_settings)
         rectangle_settings.dislayingBoxes()
     for i in range(0,len(rectangles_colour)):
+        shadow(rectangles_colour[i])
         rectangles_colour[i].dislayingBoxes()
     if rectangle_back != 0:
         rectangle_back.dislayingBoxes()
         pygame.draw.polygon(screen, 0, [(10,25),(30,15),(30,35)],3)
         pygame.draw.line(screen, 0, (30,25),(50,25),3)
     for i in range(len(rectangle_colour_time)):
+        shadow(rectangle_colour_time[i])
         rectangle_colour_time[i].dislayingBoxes()
         rectangle_colour_time[0] = Rectangle(finding_x(screen_width,200,2),650,220,50,('time: '+str(chesss.minutes)),size)
         rectangle_colour_time[1] = Rectangle(finding_x(screen_width,200,2),690,220,50,('colours: '+str(colour_scheme)),size)
     if rectangle_exit != 0:
+        shadow(rectangle_exit)
         rectangle_exit.dislayingBoxes()
 
     for event in pygame.event.get():
@@ -227,6 +248,10 @@ while True:
                     rectangle_play = temp_play
                     rectangle_settings = temp_settings
                     rectangle_settings.colour = colour
+                    rectangle_settings.width = rectangle_width
+                    rectangle_settings.height = rectangle_height
+                    rectangle_settings.x = x3_temp
+                    rectangle_settings.y = y3_temp
                     rectangle_exit = temp_exit
                     rectangle_play2 = temp_play2
                     rectangles = []

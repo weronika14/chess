@@ -125,8 +125,6 @@ def checking_king(list1, list2): #list1 is the list which contains the king, so 
         current_piece[1].link_class()
         current_piece[1].current_piece_class.moving() #specificzne dla kazdej figury, zwroci .move i .collided zeby zobaczyc czy przsuwanie na pole krola jest mozliwe jesli tak to jest szach.
         if current_piece[1].current_piece_class.collided:
-            print('piece',current_piece)
-            print(current_piece[1].current_piece_class.j, list1)
             if list1[current_piece[1].current_piece_class.j][0] == 'King':
                 attacker.append(current_piece)
                 attacker_count += 1 #tak jakby wiecej niz jedna figura atakowala krola.
