@@ -10,10 +10,6 @@ screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
 screensize = pygame.display.get_window_size()
 print(screensize)
 
-print(screen.get_alpha())
-screen.set_alpha(255)
-print(screen.get_alpha())
-
 screen_width = screensize[0]
 screen_height = screensize[1]
 colour = (999999999)
@@ -32,7 +28,7 @@ rectangle_height = 60
 background_image = pygame.image.load(r"assets\chessBackground.jpg")
 background_image = pygame.transform.scale(background_image, (screen_width,screen_height))
 
-def hover_mouse(rectangle, x, y):#makes the rectangle over which the mouse is hovering change colour and expand, x and y are the original coordinates of the rect.
+def hover_mouse(rectangle, x, y, mouse_pos):#makes the rectangle over which the mouse is hovering change colour and expand, x and y are the original coordinates of the rect.
     scale = 16
     if rectangle.rectangle.collidepoint(mouse_pos):
         rectangle.colour = new_colour
@@ -53,10 +49,11 @@ def finding_x(screenwidth, rectanglewidth, i):
     x = centre - half_rectangle
     return x
 
-def writingText(text, x, y, width, height, colour, size): #function for writing text
+def writingText(text, x, y, width, height, colour, txt_colour, size, draw_bg): #function for writing text
     textFont = pygame.font.Font('freesansbold.ttf', size)
-    pygame.draw.rect(screen, colour, (x,y, width, height))
-    textDisplay = textFont.render(str(text), True, 0)
+    if draw_bg:
+        pygame.draw.rect(screen, colour, (x,y, width, height))
+    textDisplay = textFont.render(str(text), True, txt_colour)
     textRect = textDisplay.get_rect()
     textRect.center = ((x + width/2), (y + height/2))
     screen.blit(textDisplay, textRect)
@@ -72,7 +69,6 @@ def shadow(rectangle):
     rect11.fill((colour))
     screen.blit(rect11,(x,y))
 
-
 class Rectangle:
 
     def __init__(self,x,y,width,height,text,size):
@@ -83,11 +79,13 @@ class Rectangle:
         self.text = text
         self.width = width
         self.height = height
+        self.txt_clr = 0
+        self.draw_bg = True
 
         self.rectangle = pygame.Rect(x,y,width,height)
 
     def dislayingBoxes(self):
-        writingText(self.text,self.x,self.y,self.width,self.height,self.colour,self.size)
+        writingText(self.text,self.x,self.y,self.width,self.height,self.colour,self.txt_clr,self.size, self.draw_bg)
 
 rectangle_play = Rectangle(finding_x(screen_width,rectangle_width, 2),200,rectangle_width, rectangle_height,'Play chess',size)
 rectangle_play2 = Rectangle(finding_x(screen_width,rectangle_width, 2),320,rectangle_width, rectangle_height,'Play checkers',size)
@@ -106,7 +104,8 @@ y2_temp = rectangle_play2.y
 x3_temp = rectangle_settings.x
 y3_temp = rectangle_settings.y
 
-while True:
+def main():
+    global rectangles, rectangle_exit, rectangle_back, rectangle_play, rectangle_play2, rectangle_settings, rectangles_colour, rectangle_colour_time, colour_scheme, temp_play, temp_play2, temp_settings, temp_exit
     screen.fill(0)
     screen.blit(background_image, (0, 0))
 
@@ -185,7 +184,7 @@ while True:
 
                 if rectangles_colour[0].rectangle.collidepoint(mouse_pos):
                     colour_scheme = 'black'
-                    chesss.black_colour = (60,60,60)
+                    chesss.black_colour = (80,80,80)
                     chesss.white_colour = (255,255,255)
                     chesss.borderColour = (0)
 
@@ -215,7 +214,7 @@ while True:
 
             if rectangle_play != 0: #because sometimes the rctangle won't exist. if this is pressed it will start the game by running main from other file
                 if rectangle_play.rectangle.collidepoint(mouse_pos):
-                    exit = False
+                    exit1 = False
                     #chesss.seconds = 2
                     #chesss.minutes = 0
                     chesss.assigns_timers()
@@ -234,8 +233,8 @@ while True:
                             chesss.endScreen('White won', chesss.white_colour, chesss.black_colour)
                         for event in pygame.event.get():
                             if event.type == pygame.KEYUP or event.type == pygame.MOUSEBUTTONUP:
-                                exit = True
-                        if exit == True:
+                                exit1 = True
+                        if exit1 == True:
                             break
                         pygame.display.flip()
 
@@ -269,7 +268,7 @@ while True:
                 mouse_pos = pygame.mouse.get_pos()
 
                 if rectangle_settings != 0: #has to check first because once this square is pressed it goes to 0
-                    hover_mouse(rectangle_settings, x3_temp, y3_temp)
+                    hover_mouse(rectangle_settings, x3_temp, y3_temp, mouse_pos)
 
                 for i in range(0,len(rectangles)): #chooses timer
                     if rectangles[i].rectangle.collidepoint(mouse_pos):
@@ -287,10 +286,10 @@ while True:
                             i.colour = colour
 
                 if rectangle_play != 0: #because sometimes the rctangle won't exist. if this is pressed it will start the game by running main from other file
-                    hover_mouse(rectangle_play, x_temp, y_temp)
+                    hover_mouse(rectangle_play, x_temp, y_temp, mouse_pos)
 
                 if rectangle_play2 != 0: #because sometimes the rctangle won't exist. if this is pressed it will start the game by running main from other file
-                    hover_mouse(rectangle_play2, x2_temp, y2_temp)
+                    hover_mouse(rectangle_play2, x2_temp, y2_temp, mouse_pos)
 
                 if rectangle_exit != 0:
                     if rectangle_exit.rectangle.collidepoint(mouse_pos):
@@ -306,3 +305,7 @@ while True:
 
 
     pygame.display.flip()
+
+
+while True:
+    main()

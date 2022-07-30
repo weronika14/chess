@@ -54,8 +54,8 @@ minutes = 10
 seconds = 0
 piecesBlack2 = []
 piecesWhite2 = []
-xy_zbite_biale = [0,(ScreenHeight-200)]
-xy_zbite_czarne = [(fromEdge_x+PlayWidth+40),120]
+xy_zbite_czarne = [0,(ScreenHeight-200)]
+xy_zbite_biale = [(fromEdge_x+PlayWidth+40),120]
 white_moved = [False,False,False] #left rook, king, right rook
 black_moved = [False,False,False] #left rook, king, right rook
 
@@ -453,9 +453,9 @@ class Piece:
                     piecesWhite[self.current_piece_class.j][1].y = xy_zbite_biale[1]
                     self.appending(piecesWhite2,piecesWhite, self.current_piece_class.j)
                     self.removing_from_list(self.current_piece_class.j, piecesWhite)
-                    if xy_zbite_biale[0] >= SquareWidth*3: #this sets up the pieces that have been taken off the board
-                        xy_zbite_biale[0] = 0
-                        xy_zbite_biale[1] -= SquareWidth
+                    if xy_zbite_biale[0] >= (SquareWidth*3+(fromEdge_x+PlayWidth+40)): #this sets up the pieces that have been taken off the board
+                        xy_zbite_biale[0] = (fromEdge_x+PlayWidth+40)
+                        xy_zbite_biale[1] += SquareWidth
                     else:
                         xy_zbite_biale[0] += SquareWidth
                 if check_end_game(piecesWhite, piecesBlack, 'white') != True:
@@ -474,9 +474,9 @@ class Piece:
                     piecesBlack[self.current_piece_class.j][1].y = xy_zbite_czarne[1]
                     self.appending(piecesBlack2,piecesBlack, self.current_piece_class.j)
                     self.removing_from_list(self.current_piece_class.j, piecesBlack)
-                    if xy_zbite_czarne[0] >= (SquareWidth*3+(fromEdge_x+PlayWidth+40)):
-                        xy_zbite_czarne[0] = (fromEdge_x+PlayWidth+40)
-                        xy_zbite_czarne[1] += SquareWidth
+                    if xy_zbite_czarne[0] >= SquareWidth*3:
+                        xy_zbite_czarne[0] = 0
+                        xy_zbite_czarne[1] -= SquareWidth
                     else:
                         xy_zbite_czarne[0] += SquareWidth
                 if check_end_game(piecesBlack, piecesWhite, 'black') != True:
