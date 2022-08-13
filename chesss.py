@@ -15,6 +15,7 @@ pygame.init()
 pygame.font.init()
 
 screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+#screen = pygame.display.set_mode((800,800))
 screensize = pygame.display.get_window_size()
 
 white_colour = (255,255,255)
@@ -63,33 +64,37 @@ black_moved = [False,False,False] #left rook, king, right rook
 def check_end_game(list1,list2, colour): #this function will check if each piece can move to each square in turn, and will return true if at least one piece is available to move. parameter list1 specifies the colour of the pieces whos turn it is, so if its whites turn list1 = piecesWhite and will check for each of these in turn if there is any place at all for them to move
     global current_piece
     global pressed_square
+
     attacker = []
     attacker_count = 0
     if current_piece != 0:
         temp = current_piece #zapisuje zeby na koniec zmienic spowrotem bo tu tylko zmienia zeby sprawdzic
     if pressed_square != 0:
         temp2 = pressed_square
+
     for i in board_rects:
-        pressed_square = i #zepiuje koordynary krola w pressed square zeby potem mozna bylo sprawdzic czy kazda figura moze sie tam przesunac, bo jesli tak to znaczy ze go zbije.
-        for j in range(0,len(list1)): #dla kazdej figury w jednym z kolorow patrzy czy ta figura bedzie mofla zbic krola przeciwnego koloru
+        pressed_square = i #zepiuje koordynary kazdego kwadratu po kolei zeby zobaczyc czy kazda figura po koloi moze sie tam przesunac
+        for j in range(0,len(list1)): #dla kazdej figury w jednym z kolorow patrzy czy ta figura bedzie mogla sie tam przesuanc
             current_piece = list1[j]
             if current_piece[2] != pressed_square:
                 current_piece[1].link_class()
-                current_piece[1].current_piece_class.moving() #specificzne dla kazdej figury, zwroci .move i .collided zeby zobaczyc czy przsuwanie na pole krola jest mozliwe jesli tak to jest szach.
-                if current_piece[1].current_piece_class.move == True:
-                    if colour == 'white':
-                        temp_j = piecesWhite[j][2]
-                        piecesWhite[j][2] = pressed_square
-                    else:
-                        temp_j = piecesBlack[j][2]
-                        piecesBlack[j][2] = pressed_square
+                current_piece[1].current_piece_class.moving() #specificzne dla kazdej figury, zwroci .move i .collided zeby zobaczyc czy moze sie przesunac
+
+                if current_piece[1].current_piece_class.move == True: #czyli tutaj idzie jesli ma gdzie sie ruszyc
+                    print(current_piece, pressed_square)
+
+
+                    temp_j = list1[j][2]
+                    list1[j][2] = pressed_square
+                    list1[j][1].x, list1[j][1].y = pressed_square[0], pressed_square[1]
 
                     checked = checking_king(list1, list2)
+                    print(checked)
 
-                    if colour == 'white':
-                        piecesWhite[j][2] = temp_j
-                    else:
-                        piecesBlack[j][2] = temp_j
+
+                    list1[j][1].x, list1[j][1].y = temp_j[0], temp_j[1]
+                    list1[j][2] = temp_j
+
 
                     current_piece = temp
                     pressed_square = temp2
@@ -98,12 +103,13 @@ def check_end_game(list1,list2, colour): #this function will check if each piece
                     if checked[0] == False:
                         return True
 
+    print('here')
     return False
 
 
 def endScreen(text, bg_clr, txt_clr):
-    x = 1536/2-200
-    y = 864/2-200
+    x = screensize[0]/2-200
+    y = screensize[1]/2-200
     writingText(text, x, y, 400, 400, txt_clr, bg_clr, 50, True)
     pygame.draw.rect(screen,txt_clr,(x,y,400,400),10)
 
@@ -117,9 +123,10 @@ def checking_king(list1, list2): #list1 is the list which contains the king, so 
         temp = current_piece #zapisuje zeby na koniec zmienic spowrotem bo tu tylko zmienia zeby sprawdzic
     if pressed_square != 0:
         temp2 = pressed_square
+
     for i in range(0,len(list1)):
         if list1[i][0] == 'King': #szuke gdzie jest krol w liscie
-            pressed_square = pygame.Rect(list1[i][1].x, list1[i][1].y, SquareWidth, SquareWidth) #zepiuje koordynary krola w pressed square zeby potem mozna bylo sprawdzic czy kazda figura moze sie tam przesunac, bo jesli tak to znaczy ze go zbije.
+            pressed_square = pygame.Rect(list1[i][1].x, list1[i][1].y, SquareWidth, SquareWidth) #zapiuje koordynary krola w pressed square zeby potem mozna bylo sprawdzic czy kazda figura moze sie tam przesunac, bo jesli tak to znaczy ze go zbije.
     for i in range(0,len(list2)): #dla kazdej figury w jednym z kolorow patrzy czy ta figura bedzie mofla zbic krola przeciwnego koloru
         current_piece = list2[i]
         current_piece[1].link_class()
@@ -130,8 +137,10 @@ def checking_king(list1, list2): #list1 is the list which contains the king, so 
                 attacker_count += 1 #tak jakby wiecej niz jedna figura atakowala krola.
 
 
+    print('temnp',pressed_square)
     current_piece = temp
     pressed_square = temp2
+
 
     if attacker_count > 0: #jesli tylko jedna figura atakuje krola.
         if attacker_count == 1:
@@ -277,12 +286,12 @@ def displayingBoard():  #making the chess board
     '''
     #prints the x and y coordinates of the board, used for testing
     for i in range(fromEdge_y,ScreenWidth,SquareWidth):
-        writingText(i, 0, i, fromEdge_y, SquareWidth,(255,255,255),0,20)
+        writingText(i, 0, i, fromEdge_y, SquareWidth,(255,255,255),0,20, True)
     for i in range(fromEdge_x,ScreenWidth,SquareWidth):
-        writingText(i, i, 0, SquareWidth,fromEdge_y,(255,255,255),0,20)
+        writingText(i, i, 0, SquareWidth,fromEdge_y,(255,255,255),0,20, True)
     '''
 
-
+#1, this is the first function is goes to when the mouse is clicked.
 def checking_move(list1, list2,mouse_pos): #the colour is to check whos move it is, list1 is either piecesWhite or piecesBlack (the one who's move it currently is)
     global current_piece
     global pressed_square
@@ -395,6 +404,7 @@ class Piece:
             self.x = temp_x
             self.y = temp_y
 
+    #2, this is the 2nd function it goes to when the mouse is clicked and when both the piece that is to move and the destination swaure are chosen.
     def moving_piece(self): #changes the x and y coordinates (first going to the class's method for moving to check if its allowed to do so) and updates this in the array of all the pieces
         global current_piece
         global pressed_square
@@ -405,7 +415,7 @@ class Piece:
         temp2 = current_piece[2]
 
         castle = self.current_piece_class.moving() #each piece has its own function for checking if it can move, which is defined in the pieces class
-        #this will return None for any movement apart from castling, so if the king is pressed to move to the left or right and the collision is also hecked in the king.moving() function
+        #this will return None for any movement apart from castling, so if the king is pressed to move to the left or right and the collision is also checked in the king.moving() function
         if castle != None: #so if this movement is castling it goes to here because any other move would return None. If the move is catling the value returned is the new coordinate the king should move to.
             if current_piece[1].colour == 'white':
                 returned = self.castling_part2(piecesWhite, castle) #if castling is true then returned will be the new modified list with king's and rooks coordinates changed, otherwise itll return None
@@ -437,6 +447,7 @@ class Piece:
                 if piecesWhite[self.current_piece_class.j][0] == 'King':
                     self.current_piece_class.move = False
                     self.current_piece_class.collided = False
+
         if self.current_piece_class.move == True: #only if it can move, it checks if after the move this pieces king will be under attack, and then the piece wont move
             self.checking_checkmate()
 
@@ -479,7 +490,7 @@ class Piece:
                         xy_zbite_czarne[1] -= SquareWidth
                     else:
                         xy_zbite_czarne[0] += SquareWidth
-                if check_end_game(piecesBlack, piecesWhite, 'black') != True:
+                if check_end_game(piecesBlack, piecesWhite, 'black') != True: #this will return True or False depending on whether any of the black pieces will be able to move.
                     playing = False
 
             if temp2 == ((fromEdge_x+7*SquareWidth),(fromEdge_y+7*SquareWidth),SquareWidth,SquareWidth): #if the piece that just moved is the rook in the right corner then it moving is set to True
